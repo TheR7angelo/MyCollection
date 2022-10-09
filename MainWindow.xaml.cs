@@ -7,9 +7,6 @@ using MyCollection.Test;
 
 namespace MyCollection
 {
-    /// <summary>
-    /// Interaction logic for MainWindow.xaml
-    /// </summary>
     public partial class MainWindow
     {
         public MainWindow()
@@ -36,12 +33,16 @@ namespace MyCollection
                 Points = new List<PointLatLng>{point2},
                 GeomType = Maps.GeomType.Point
             });
-            Maps.AddLayer(new Maps.MyStruct
+            var l = new Maps.MyStruct
             {
                 Name = "Mairie 3",
-                Points = new List<PointLatLng>{point2},
+                Points = new List<PointLatLng> { point2 },
                 GeomType = Maps.GeomType.Point
-            });
+            };
+            l.SetID();
+            Maps.AddLayer(l);
+            
+            l.AddPoint(l.Id!, new PointLatLng(0, 0));
         }
     }
 }

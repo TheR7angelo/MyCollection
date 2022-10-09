@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Dynamic;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
@@ -14,18 +15,19 @@ namespace MyCollection;
 
 public partial class Maps
 {
+    private static Maps instance;
     private static readonly Random Rng = new ();
     private static List<MyStruct> _listLayout = new();
 
     public Maps()
     {
         InitializeComponent();
+        instance = this;
     }
 
     public void AddLayer(MyStruct layer)
     {
-        var name = layer.Name!.Replace(" ", "_");
-        layer.Id = $"{name}_{Guid.NewGuid():N}";
+        if (layer.Id is null) layer.SetID();
 
         var color = GetRandomColor();
         
@@ -101,6 +103,28 @@ public partial class Maps
         {
         }
 
+        #region Add
+
+        public void AddPoint(string id, PointLatLng point)
+        {
+            foreach (var layout in _listLayout.Where(layout => layout.Id!.Equals(id)))
+            {
+                switch (layout.GeomType)
+                {
+                    case Maps.GeomType.Point:
+                        layout.Points.Add(point);
+                        var marker = new GMapMarker(point){Shape = layout.Shape};
+                        marker.Shape!.Visibility = layout.Visibility;
+                        marker.ZIndex = layout.Index;
+                        layout.Markers.Add(marker);
+                        instance.AddGeom(marker);
+                        break;
+                }
+            }
+        }
+
+        #endregion
+        
         #region Setter
 
         public void SetIndex(string id, int index)
@@ -122,6 +146,12 @@ public partial class Maps
         }
 
         #endregion
+
+        public void SetID()
+        {
+            var name = Name!.Replace(" ", "_");
+            Id = $"{name}_{Guid.NewGuid():N}";
+        }
     }
 
     private void ListLayer_OnDrop(object sender, DragEventArgs e)
@@ -134,6 +164,11 @@ public partial class Maps
 
             _listLayout.Find(s => s.Id!.Equals(check!.Name)).SetIndex(check!.Name, index);
         }
+    }
+
+    private void AddGeom(GMapMarker gMapMarker)
+    {
+        Gmap.Markers.Add(gMapMarker);
     }
 
     private static SolidColorBrush GetRandomColor()
