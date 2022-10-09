@@ -2,8 +2,7 @@
 using System.Collections.Generic;
 using System.Windows.Media;
 using System.Windows.Shapes;
-using GMap.NET;
-using MyCollection.Test;
+using GMap.NET;using MyCollection.Test;
 
 namespace MyCollection
 {
@@ -42,7 +41,8 @@ namespace MyCollection
             l.SetID();
             Maps.AddLayer(l);
             
-            l.AddPoint(l.Id!, new PointLatLng(0, 0));
+            // todo corriger add point
+            l.AddPoint(l.Id!, new PointLatLng(10, 10));
         }
     }
 }

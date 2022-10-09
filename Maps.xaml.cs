@@ -24,7 +24,7 @@ public partial class Maps
         InitializeComponent();
         instance = this;
     }
-
+    
     public void AddLayer(MyStruct layer)
     {
         if (layer.Id is null) layer.SetID();
@@ -105,21 +105,39 @@ public partial class Maps
 
         #region Add
 
+        private static void _AddPoint(MyStruct layout, PointLatLng point)
+        {
+            layout.Points.Add(point);
+            var marker = new GMapMarker(point){Shape = layout.Shape};
+            marker.Shape!.Visibility = layout.Visibility;
+            marker.ZIndex = layout.Index;
+            layout.Markers.Add(marker);
+            instance.AddGeom(marker);
+        }
+
+        public void AddPoint(string id, IEnumerable<PointLatLng> points)
+        {
+            foreach (var layout in _listLayout.Where(layout => layout.Id!.Equals(id)))
+            {
+                if (!layout.GeomType.Equals(Maps.GeomType.Point))
+                {
+                    Console.WriteLine("error");
+                    break;
+                }
+                foreach (var point in points) _AddPoint(layout, point);
+            }
+        }
+        
         public void AddPoint(string id, PointLatLng point)
         {
             foreach (var layout in _listLayout.Where(layout => layout.Id!.Equals(id)))
             {
-                switch (layout.GeomType)
+                if (!layout.GeomType.Equals(Maps.GeomType.Point))
                 {
-                    case Maps.GeomType.Point:
-                        layout.Points.Add(point);
-                        var marker = new GMapMarker(point){Shape = layout.Shape};
-                        marker.Shape!.Visibility = layout.Visibility;
-                        marker.ZIndex = layout.Index;
-                        layout.Markers.Add(marker);
-                        instance.AddGeom(marker);
-                        break;
+                    Console.WriteLine("error");
+                    break;
                 }
+                _AddPoint(layout, point);
             }
         }
 
