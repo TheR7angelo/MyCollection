@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Collections.Specialized;
 using System.Dynamic;
 using System.Linq;
 using System.Windows;
@@ -15,19 +17,25 @@ namespace MyCollection;
 
 public partial class Maps
 {
-    private static Maps instance;
+    private readonly Maps _instance;
     private static readonly Random Rng = new ();
-    private static List<MyStruct> _listLayout = new();
+    private static List<MyStruct> _listLayer = new();
+    // private ObservableCollection<MyStruct> _listLayout = new();
 
     public Maps()
     {
         InitializeComponent();
-        instance = this;
+        _instance = this;
     }
-    
-    public void AddLayer(MyStruct layer)
+
+    private void myList_CollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
     {
-        if (layer.Id is null) layer.SetID();
+        Console.Write("hey");
+    }
+
+    public MyStruct AddLayer(MyStruct layer)
+    {
+        if (layer.Id is null) layer.SetId();
 
         var color = GetRandomColor();
         
@@ -42,17 +50,19 @@ public partial class Maps
 
         var item = new ListBoxItem{Content = check};
 
-        layer.Index = -ListLayer.Items.Add(item);
+        layer.ZIndex = -ListLayer.Items.Add(item);
 
         foreach (var marker in layer.Points.Select(pt => new GMapMarker(pt)))
         {
             marker.Shape = layer.Shape;
-            marker.ZIndex = layer.Index;
+            marker.ZIndex = layer.ZIndex;
 
             layer.Markers.Add(marker);
             Gmap.Markers.Add(marker);
         }
-        _listLayout.Add(layer);
+        _listLayer.Add(layer);
+
+        return layer;
     }
 
     private void CheckOnClick(object sender, RoutedEventArgs e)
@@ -60,7 +70,7 @@ public partial class Maps
         var check = sender as CheckBox;
         var visibility = (bool)check!.IsChecked! ? Visibility.Visible : Visibility.Hidden;
 
-        _listLayout.Find(s => s.Id!.Equals(check.Name)).SetVisibility(check.Name, visibility);
+        _listLayer.Find(s => s.Id!.Equals(check.Name)).SetVisibility(check.Name, visibility);
     }
 
     private void Gmap_OnLoaded(object sender, RoutedEventArgs e)
@@ -91,7 +101,7 @@ public partial class Maps
     {
         public string? Id = null;
         public string? Name = null;
-        public int Index = 0;
+        public int ZIndex = 0;
         public GeomType? GeomType = null;
         public List<PointLatLng> Points = new ();
         public Shape? Shape = new Ellipse { Height = 7, Width = 7, Fill = GetRandomColor() };
@@ -103,60 +113,26 @@ public partial class Maps
         {
         }
 
-        #region Add
-
-        private static void _AddPoint(MyStruct layout, PointLatLng point)
-        {
-            layout.Points.Add(point);
-            var marker = new GMapMarker(point){Shape = layout.Shape};
-            marker.Shape!.Visibility = layout.Visibility;
-            marker.ZIndex = layout.Index;
-            layout.Markers.Add(marker);
-            instance.AddGeom(marker);
-        }
-
-        public void AddPoint(string id, IEnumerable<PointLatLng> points)
-        {
-            foreach (var layout in _listLayout.Where(layout => layout.Id!.Equals(id)))
-            {
-                if (!layout.GeomType.Equals(Maps.GeomType.Point))
-                {
-                    Console.WriteLine("error");
-                    break;
-                }
-                foreach (var point in points) _AddPoint(layout, point);
-            }
-        }
-        
-        public void AddPoint(string id, PointLatLng point)
-        {
-            foreach (var layout in _listLayout.Where(layout => layout.Id!.Equals(id)))
-            {
-                if (!layout.GeomType.Equals(Maps.GeomType.Point))
-                {
-                    Console.WriteLine("error");
-                    break;
-                }
-                _AddPoint(layout, point);
-            }
-        }
-
-        #endregion
-        
         #region Setter
 
+        public void SetId()
+        {
+            var name = Name!.Replace(" ", "_");
+            Id = $"{name}_{Guid.NewGuid():N}";
+        }
+        
         public void SetIndex(string id, int index)
         {
-            foreach (var layout in _listLayout.Where(layout => layout.Id!.Equals(id)))
+            foreach (var layout in _listLayer.Where(layout => layout.Id!.Equals(id)))
             {
                 foreach (var point in layout.Markers) point.ZIndex = index;
             }
-            Index = index;
+            ZIndex = index;
         }
 
         public void SetVisibility(string id, Visibility visibility)
         {
-            foreach (var layout in _listLayout.Where(layout => layout.Id!.Equals(id)))
+            foreach (var layout in _listLayer.Where(layout => layout.Id!.Equals(id)))
             {
                 foreach (var point in layout.Markers) point.Shape.Visibility = visibility;
             }
@@ -164,12 +140,6 @@ public partial class Maps
         }
 
         #endregion
-
-        public void SetID()
-        {
-            var name = Name!.Replace(" ", "_");
-            Id = $"{name}_{Guid.NewGuid():N}";
-        }
     }
 
     private void ListLayer_OnDrop(object sender, DragEventArgs e)
@@ -180,11 +150,25 @@ public partial class Maps
         {
             var check = item.Content as CheckBox;
 
-            _listLayout.Find(s => s.Id!.Equals(check!.Name)).SetIndex(check!.Name, index);
+            _listLayer.Find(s => s.Id!.Equals(check!.Name)).SetIndex(check!.Name, index);
         }
     }
 
-    private void AddGeom(GMapMarker gMapMarker)
+    public void AddPoint(MyStruct layer, PointLatLng point)
+    {
+        foreach (var _layer in _listLayer.Where(s => s.Id.Equals(layer.Id)))
+        {
+            _layer.Points.Add(point);
+
+            var marker = new GMapMarker(point);
+            marker.Shape = layer.Shape;
+            marker.ZIndex = layer.ZIndex;
+            Gmap.Markers.Add(marker);
+        }
+    }
+
+    
+    public void AddGeom(GMapMarker gMapMarker)
     {
         Gmap.Markers.Add(gMapMarker);
     }

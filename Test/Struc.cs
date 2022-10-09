@@ -24,7 +24,7 @@ public partial class Nominatim
     
     private struct Address
     {
-        public long house_number = 0;
+        public string? house_number = null;
         public string? road = null;
         public string? suburb = null;
         public string? city = null;

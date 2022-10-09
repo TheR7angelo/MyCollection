@@ -1,8 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Windows.Media;
 using System.Windows.Shapes;
-using GMap.NET;using MyCollection.Test;
+using GMap.NET;
+using GMap.NET.WindowsPresentation;
+using MyCollection.Test;
 
 namespace MyCollection
 {
@@ -14,6 +17,7 @@ namespace MyCollection
 
             var point1 = Nominatim.AddressToPoint("4 Pl. du Louvre, 75001 Paris");
             var point2 = Nominatim.AddressToPoint("1 Pl. Jules Joffrin, 75018 Paris");
+            var point3 = Nominatim.AddressToPoint("2-4 Rue Sainte Catherine, 33000 Bordeaux");
 
             var address = Nominatim.PointToAddress(point1);
             Console.WriteLine(address);
@@ -32,17 +36,16 @@ namespace MyCollection
                 Points = new List<PointLatLng>{point2},
                 GeomType = Maps.GeomType.Point
             });
-            var l = new Maps.MyStruct
+
+            var layer = Maps.AddLayer(new Maps.MyStruct
             {
-                Name = "Mairie 3",
-                Points = new List<PointLatLng> { point2 },
+                Name = "Apple Store",
+                Points = new List<PointLatLng> { point3 },
                 GeomType = Maps.GeomType.Point
-            };
-            l.SetID();
-            Maps.AddLayer(l);
-            
-            // todo corriger add point
-            l.AddPoint(l.Id!, new PointLatLng(10, 10));
+            });
+
+            // todo bug de merde
+            //Maps.AddPoint(layer, new PointLatLng(0, 0));
         }
     }
 }
