@@ -43,8 +43,5 @@ namespace MyCollection
                 GeomType = Maps.GeomType.Point
             });
         }
-        
-        
-        
     }
 }
