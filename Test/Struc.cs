@@ -14,7 +14,7 @@ public partial class Nominatim
         public float lat = 0;
         public float lon = 0;
         public string? display_name = null;
-        public Address address;
+        public Address address = new ();
         public IEnumerable<float> boundingbox = Array.Empty<float>();
 
         public NominatimStruc()

@@ -14,7 +14,7 @@
             <ColumnDefinition Width="5*"/>
         </Grid.ColumnDefinitions>
         
-        <ListBox Grid.Column="0" Name="ListLayer" Drop="ListLayer_OnDrop" dd:DragDrop.IsDragSource="True" dd:DragDrop.IsDropTarget="True"/>
+        <TreeView Grid.Column="0" Name="ListLayer" Drop="ListLayer_OnDrop" dd:DragDrop.IsDragSource="True" dd:DragDrop.IsDropTarget="True"/>
         
         <gmaps:GMapControl Grid.Column="1" Name="Gmap" Loaded="Gmap_OnLoaded"/>
     </Grid>

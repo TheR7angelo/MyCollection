@@ -1,10 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Windows.Media;
 using System.Windows.Shapes;
 using GMap.NET;
-using GMap.NET.WindowsPresentation;
 using MyCollection.Test;
 
 namespace MyCollection
@@ -34,7 +32,7 @@ namespace MyCollection
             {
                 Name = "Mairie 2",
                 Points = new List<PointLatLng>{point2},
-                GeomType = Maps.GeomType.Point
+                GeomType = Maps.GeomType.Point,
             });
 
             var layer = Maps.AddLayer(new Maps.MyStruct
@@ -45,7 +43,8 @@ namespace MyCollection
             });
 
             // todo bug de merde
-            //Maps.AddPoint(layer, new PointLatLng(0, 0));
+            Maps.AddPoint(layer, new PointLatLng(0, 0));
+            Maps.AddPoint(layer, new PointLatLng(10, 10));
         }
     }
 }

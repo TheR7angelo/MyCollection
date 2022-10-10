@@ -8,6 +8,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
+using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
 using GMap.NET;
 using GMap.NET.MapProviders;
@@ -38,18 +39,27 @@ public partial class Maps
         if (layer.Id is null) layer.SetId();
 
         var color = GetRandomColor();
+
+        var stack = new StackPanel { Orientation = Orientation.Horizontal };
+        stack.Children.Add(new Label { Content = $"{layer.Name}_{color.ToString()}" });
+        stack.Children.Add(new Image { Source = new BitmapImage(new Uri(@"C:\Program Files\QGIS 3.26.0\apps\grass\grass78\docs\html\grass_icon.png")) });
         
         var check = new CheckBox
         {
             Name = layer.Id,
-            Content = $"{layer.Name}_{color.ToString()}",
+            Content = stack,
             IsChecked = true
         };
+        // var check = new CheckBox
+        // {
+        //     Name = layer.Id,
+        //     Content = $"{layer.Name}_{color.ToString()}",
+        //     IsChecked = true
+        // };
         
         check.Click += CheckOnClick;
 
         var item = new ListBoxItem{Content = check};
-
         layer.ZIndex = -ListLayer.Items.Add(item);
 
         foreach (var marker in layer.Points.Select(pt => new GMapMarker(pt)))
@@ -104,7 +114,8 @@ public partial class Maps
         public int ZIndex = 0;
         public GeomType? GeomType = null;
         public List<PointLatLng> Points = new ();
-        public Shape? Shape = new Ellipse { Height = 7, Width = 7, Fill = GetRandomColor() };
+        public static Label Etiquete = new();
+        public UIElement? Shape = new StackPanel{Orientation = Orientation.Vertical, Children = {Etiquete, new Ellipse{Height = 7, Width = 7, Fill = GetRandomColor()}}};
         public Visibility Visibility = Visibility.Visible;
         public List<GMapMarker> Markers = new ();
         public List<GMapPolygon> Polygons = new ();
